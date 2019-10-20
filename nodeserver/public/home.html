@@ -35,68 +35,80 @@
     <script src="https://public.chirp.io/wasm/3.2.0/chirpSdk.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
-        var firebaseConfig = {
-            apiKey: "AIzaSyBPTxEcmp_9yib4KUtzw80Pw5UT0r0Fhro",
-            authDomain: "drive-me-fd3b1.firebaseapp.com",
-            databaseURL: "https://drive-me-fd3b1.firebaseio.com",
-            projectId: "drive-me-fd3b1",
-            storageBucket: "drive-me-fd3b1.appspot.com",
-            messagingSenderId: "749427605920",
-            appId: "1:749427605920:web:5ae9bbf46c7f28075624c5",
-            measurementId: "G-9F7WCC76RH"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
+        window.onload = function () {
+            // Your web app's Firebase configuration
+            var firebaseConfig = {
+                apiKey: "AIzaSyBPTxEcmp_9yib4KUtzw80Pw5UT0r0Fhro",
+                authDomain: "drive-me-fd3b1.firebaseapp.com",
+                databaseURL: "https://drive-me-fd3b1.firebaseio.com",
+                projectId: "drive-me-fd3b1",
+                storageBucket: "drive-me-fd3b1.appspot.com",
+                messagingSenderId: "749427605920",
+                appId: "1:749427605920:web:5ae9bbf46c7f28075624c5",
+                measurementId: "G-9F7WCC76RH"
+            };
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            firebase.analytics();
 
-        let auth = firebase.default.auth();
-        let firestore = firebase.firestore();
-        const {
-            Chirp
-        } = ChirpSDK;
+            let auth = firebase.default.auth();
+            let firestore = firebase.firestore();
+            const {
+                Chirp
+            } = ChirpSDK;
 
-        auth.onAuthStateChanged(function (authdata) {
-            if (authdata) {
-                return;
-            } else {
-                window.open("index.html", "_self");
-                return;
-            }
-        });
-
-        sel("#chirp").addEventListener("click", () => {
-
-            Chirp({
-                key: 'a446E331c381CdbBdD8EFeE3e',
-                onReceived: data => {
-                    if (data.length > 0) {
-                        sel("#placeholder").innerHTML = (toAscii(data));
-                        setTimeout(() => {
-                            sel("#placeholder").innerHTML = "";
-
-                        }, 3000);
-                    } else {
-                        console.error('Decode failed')
-                    }
+            auth.onAuthStateChanged(function (authdata) {
+                if (authdata) {
+                    return;
+                } else {
+                    window.open("index.html", "_self");
+                    return;
                 }
-            }).then(sdk => {
-                sdk.start().then(() => {
-                    const rc = sdk.send('hello')
-                    if (rc !== 0) console.error(sdk.errorToString(rc))
-                }).catch(console.error)
-            }).catch(console.error)
-        });
+            });
+            (async function () {
+                let sdk = await Chirp({
+                    key: 'a446E331c381CdbBdD8EFeE3e',
+                    onReceived: data => {
+                        if (data.length > 0) {
+                            sel("#placeholder").innerHTML = (toAscii(data));
+                            setTimeout(() => {
+                                sel("#placeholder").innerHTML = "";
+
+                            }, 3000);
+                        } else {
+                            console.error('Decode failed')
+                        }
+                    }
+                });
+
+                sel("#chirp").addEventListener("click", () => {
+                    sdk.start().then(() => {
+                        console.log("hit");
+                        const rc = sdk.send('hello')
+                        if (rc !== 0) console.error(sdk.errorToString(rc))
+                    }).catch(console.error)
+
+                });
+
+            })();
 
 
 
 
-        sel("#signout").addEventListener("click", function () {
-            auth.signOut();
-        });
 
-        function sel(d) {
-            return document.querySelector(d);
+
+            sel("#signout").addEventListener("click", function () {
+                auth.signOut();
+            });
+
+            function sel(d) {
+                return document.querySelector(d);
+            }
+
+            function toAscii(uint8) {
+                return String.fromCharCode.apply(null, uint8);
+            }
+
         }
     </script>
 </body>
