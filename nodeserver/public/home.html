@@ -23,8 +23,13 @@
         </div>
     </div>
     <button id="chirp" class="btn purp bold white">chirp</button>
+    <button id="recordButton" class="btn purp bold white">Record</button>
+    <button id="stopButton" class="btn purp bold white">Stop</button>
     <br>
-    <p id="placeholder bold text-center"></p>
+    <p class="bold text-center" id="pairi">Not paired</p>
+    <p id="driver" class="bold text-center"></p>
+    <p id="placeholder" class="bold text-center"></p>
+    <ol id="recordingsList"></ol>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
@@ -33,6 +38,7 @@
      https://firebase.google.com/docs/web/setup#available-libraries -->
     <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-analytics.js"></script>
     <script src="https://public.chirp.io/wasm/3.2.0/chirpSdk.js"></script>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
 
     <script>
         window.onload = function () {
@@ -47,18 +53,41 @@
                 appId: "1:749427605920:web:5ae9bbf46c7f28075624c5",
                 measurementId: "G-9F7WCC76RH"
             };
+
+            window.gumStream = "";
+
+            window.rec = "";
+            //Recorder.js object 
+            window.input = "";
+            //MediaStreamAudioSourceNode we'll be recording 
+            // shim for AudioContext when it's not avb. 
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            window.audioContext;
+
             // Initialize Firebase
             firebase.initializeApp(firebaseConfig);
             firebase.analytics();
 
             let auth = firebase.default.auth();
-            let firestore = firebase.firestore();
+            let db = firebase.firestore();
+
             const {
                 Chirp
             } = ChirpSDK;
 
+
+
+
             auth.onAuthStateChanged(function (authdata) {
                 if (authdata) {
+
+                    db.collection("users").where("uid", "==", firebase.auth().currentUser.uid).get().then((
+                        x) => {
+                        x.forEach((doc) => {
+                            window.userDetails = doc.data();
+                        })
+                    });
+
                     return;
                 } else {
                     window.open("index.html", "_self");
@@ -80,35 +109,172 @@
                         }
                     }
                 });
+                await sdk.start();
 
                 sel("#chirp").addEventListener("click", () => {
-                    sdk.start().then(() => {
-                        console.log("hit");
-                        const rc = sdk.send('hello')
+                    db.collection("pairs").doc(firebase.auth().currentUser.uid).set({
+                        driver: null
+                    }).then(() => {
+                        return db.collection("pairs").doc(firebase.auth()
+                            .currentUser.uid).collection("converse").set({
+                            userMessage: null,
+                            driverMessage: null
+                        })
+                    }).then(() => {
+                        const rc = sdk.send(userDetails.chirpid);
+                        db.collection("pairs").doc(firebase.auth().currentUser.uid)
+                            .onSnapshot((doc) => {
+                                var data = doc.data();
+                                if (data.driver != null) {
+                                    sel("#pairi").innerHTML =
+                                        `Paired to ${data.driver}`;
+                                }
+                            });
+
+                        db.collection("pairs").doc(firebase.auth()
+                                .currentUser.uid).collection("converse").doc("abc")
+                            .onSnapshot((
+                                doc) => {
+                                var data = doc.data();
+                                if (data.driverMessage != null) {
+                                    sel("#driver").innerHTML =
+                                        `Driver message : ${data.message}`;
+                                }
+                            })
+
                         if (rc !== 0) console.error(sdk.errorToString(rc))
-                    }).catch(console.error)
+                    })
 
                 });
 
             })();
 
+            URL = window.URL || window.webkitURL;
+            //stream from getUserMedia() 
 
 
+            //new audio context to help us record 
+            var recordButton = document.getElementById("recordButton");
+            var stopButton = document.getElementById("stopButton");
+            //add events to those 3 buttons 
+            recordButton.addEventListener("click", startRecording);
+            stopButton.addEventListener("click", stopRecording);
 
+            function startRecording() {
+                audioContext = new AudioContext();
+                /* Simple constraints object, for more advanced audio features see
 
+https://addpipe.com/blog/audio-constraints-getusermedia/ */
 
-            sel("#signout").addEventListener("click", function () {
-                auth.signOut();
-            });
+                var constraints = {
+                    audio: true,
+                    video: false
+                }
+                /* Disable the record button until we get a success or fail from getUserMedia() */
 
-            function sel(d) {
-                return document.querySelector(d);
+                recordButton.disabled = true;
+                stopButton.disabled = false;
+
+                /* We're using the standard promise based getUserMedia()
+
+                https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia */
+
+                navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+                    console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
+                    /* assign to gumStream for later use */
+                    gumStream = stream;
+                    console.log(gumStream);
+                    console.log(audioContext);
+                    /* use the stream */
+                    input = audioContext.createMediaStreamSource(stream);
+                    /* Create the Recorder object and configure to record mono sound (1 channel) Recording 2 channels will double the file size */
+                    rec = new Recorder(input, {
+                        numChannels: 1
+                    })
+                    //start the recording process 
+                    rec.record()
+                    console.log("Recording started");
+                }).catch(function (err) {
+                    //enable the record button if getUserMedia() fails 
+                    console.log(err);
+                    recordButton.disabled = false;
+                    stopButton.disabled = true;
+                });
             }
+        }
 
-            function toAscii(uint8) {
-                return String.fromCharCode.apply(null, uint8);
-            }
 
+        function stopRecording() {
+            console.log("stopButton clicked");
+            //disable the stop button, enable the record too allow for new recordings 
+            stopButton.disabled = true;
+            recordButton.disabled = false;
+            //tell the recorder to stop the recording 
+            //stop microphone access 
+            gumStream.getAudioTracks()[0].stop();
+            //create the wav blob and pass it on to createDownloadLink 
+            rec.exportWAV(createDownloadLink);
+        }
+
+
+        function createDownloadLink(blob) {
+            var url = URL.createObjectURL(blob);
+            var au = document.createElement('audio');
+            var li = document.createElement('li');
+            var link = document.createElement('a');
+            //add controls to the <audio> element 
+            au.controls = true;
+            au.src = url;
+            //link the a element to the blob 
+            link.href = url;
+            link.download = new Date().toISOString() + '.wav';
+            link.innerHTML = link.download;
+            //add the new audio and a elements to the li element 
+            li.appendChild(au);
+            li.appendChild(link);
+            //add the li element to the ordered list 
+            recordingsList.appendChild(li);
+            var filename = new Date().toISOString();
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function (e) {
+                if (this.readyState === 4) {
+                    console.log("Server returned: ", xhr.responseText);
+                    var {
+                        translation
+                    } = JSON.parse(xhr.responseText);
+                    firebase.firestore().collection("pairs").doc(userDetails.uid).collection("converse").doc("abc")
+                        .set({
+                            userMessage: translation
+                        });
+                } else if (this.readyState === 3) {
+                    console.log("sent");
+
+                }
+            };
+            var fd = new FormData();
+            fd.append("lang", "en");
+            fd.append("target", "hi");
+            fd.append("audio_data", blob, filename);
+
+            xhr.open("POST", "http://172.16.26.186:8080/translate", true);
+            xhr.send(fd);
+        }
+
+
+
+
+
+
+        sel("#signout").addEventListener("click", function () {
+            auth.signOut();
+        });
+
+        function sel(d) {
+            return document.querySelector(d);
+        }
+
+        function toAscii(uint8) {
+            return String.fromCharCode.apply(null, uint8);
         }
     </script>
 </body>
