@@ -1,0 +1,262 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-size: 16px;
+    font-family: 'Roboto', sans-serif;
+}
+
+
+
+@font-face {
+    font-family: futura;
+    src: url("./assets/futura.otf");
+}
+
+.bold {
+    font-family: futura;
+    font-size: 22px;
+}
+
+.width-90 {
+    width: 90%;
+}
+
+.extend {
+    width: 100%;
+}
+
+.marg-top {
+    margin-top: 2%
+}
+
+.white {
+    color: white;
+}
+
+.bg-white {
+    background: white;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.flip-card {
+    background-color: transparent;
+    width: 300px;
+    height: 300px;
+    perspective: 1000px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+}
+
+
+
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+.purp {
+    background: #6e6afa;
+}
+
+.bord-purp {
+    border-bottom: 2px solid #6e6afa;
+    background: white !important;
+}
+
+/* Shutter Out Horizontal */
+.hvr-shutter-out-horizontal {
+    display: inline-block;
+    vertical-align: middle;
+    -webkit-transform: perspective(1px) translateZ(0);
+    transform: perspective(1px) translateZ(0);
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+    position: relative;
+    background: #e1e1e1;
+    -webkit-transition-property: color;
+    transition-property: color;
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+}
+
+.hvr-shutter-out-horizontal:before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #6e6afa;
+    -webkit-transform: scaleX(0);
+    transform: scaleX(0);
+    -webkit-transform-origin: 50%;
+    transform-origin: 50%;
+    -webkit-transition-property: transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-timing-function: ease-out;
+    transition-timing-function: ease-out;
+}
+
+.hvr-shutter-out-horizontal:hover,
+.hvr-shutter-out-horizontal:focus,
+.hvr-shutter-out-horizontal:active {
+    cursor: pointer;
+    color: white;
+}
+
+.hvr-shutter-out-horizontal:hover:before,
+.hvr-shutter-out-horizontal:focus:before,
+.hvr-shutter-out-horizontal:active:before {
+    -webkit-transform: scaleX(1);
+    transform: scaleX(1);
+}
+
+.padd {
+    padding: 22px;
+}
+
+
+
+.ctcGqD {
+    background-color: rgb(255, 255, 255);
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 4px 0px;
+    height: 100%;
+    border-radius: 8px;
+    padding: 40px;
+    transition: all 100ms ease-in-out 0s;
+}
+
+.dbiRCJ {
+    perspective: 500px;
+}
+
+.hMUaBO {
+    cursor: pointer;
+    width: 360px;
+    height: 72px;
+    display: flex;
+    position: relative;
+    background-color: rgb(238, 240, 241);
+    place-content: center;
+    margin: 0px auto;
+    border-radius: 36px;
+    transition: all 100ms ease-in-out 0s
+}
+
+.hMUaBO::before {
+    content: "Login";
+    left: 2.6rem;
+    color: rgb(255, 255, 255);
+    font-family: futura;
+    font-size: 22px;
+    transition: all 100ms ease-in-out 0s;
+}
+
+.hqrgFY {
+    width: 200px;
+    height: 72px;
+    position: relative;
+    z-index: 0;
+    box-shadow: rgba(0, 0, 0, 0.17) 0px 8px 20px 0px;
+    border-radius: 36px;
+    background: #6e6afa;
+    transition: all 100ms ease-in-out 0s;
+
+}
+
+.hMUaBO::after {
+    content: "Signup";
+    right: 2.4rem;
+    color: rgb(97, 107, 112);
+    font-family: futura;
+    font-size: 22px;
+    transition: all 100ms ease-in-out 0s;
+
+}
+
+.hMUaBO::after,
+.hMUaBO::before {
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+    color: rgb(255, 255, 255);
+    line-height: 72px;
+    font-size: 24px;
+    font-weight: 600;
+    will-change: color;
+    transition: all 100ms ease-in-out 0s;
+}
+
+
+
+.scene {
+    width: 100%;
+    height: 100%;
+    margin: 40px 0;
+    perspective: 600px;
+}
+
+.card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transform-origin: center right;
+    transition: transform 1s;
+    padding: 10px;
+}
+
+.card.is-flipped {
+    transform: translateX(-100%) rotateY(-180deg);
+}
+
+.card__face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    text-align: center;
+    font-weight: bold;
+    backface-visibility: hidden;
+    padding: 18px;
+}
+
+
+
+.card__face--back {
+    transform: rotateY(180deg);
+}
+
+.card {
+    border: none !important;
+}

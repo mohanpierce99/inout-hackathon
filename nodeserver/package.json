@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ip": "^1.1.5",
+    "on-file-change": "^0.1.0",
+    "onchange": "^6.1.0"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "onchange": "^6.1.0"
-  }
+  "license": "ISC"
 }

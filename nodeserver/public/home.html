@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="marg-top"></div>
+    <div class="row">
+        <div class="col-10">
+            <h3 class="text-center bold">Drive Me!</h3>
+        </div>
+        <div class="col-2">
+            <button id="signout" class="btn purp bold extend">Sign out</button>
+        </div>
+    </div>
+    <button id="chirp" class="btn purp bold white">chirp</button>
+    <br>
+    <p id="placeholder bold text-center"></p>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-analytics.js"></script>
+    <script src="https://public.chirp.io/wasm/3.2.0/chirpSdk.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyBPTxEcmp_9yib4KUtzw80Pw5UT0r0Fhro",
+            authDomain: "drive-me-fd3b1.firebaseapp.com",
+            databaseURL: "https://drive-me-fd3b1.firebaseio.com",
+            projectId: "drive-me-fd3b1",
+            storageBucket: "drive-me-fd3b1.appspot.com",
+            messagingSenderId: "749427605920",
+            appId: "1:749427605920:web:5ae9bbf46c7f28075624c5",
+            measurementId: "G-9F7WCC76RH"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        let auth = firebase.default.auth();
+        let firestore = firebase.firestore();
+        const {
+            Chirp
+        } = ChirpSDK;
+
+        auth.onAuthStateChanged(function (authdata) {
+            if (authdata) {
+                return;
+            } else {
+                window.open("index.html", "_self");
+                return;
+            }
+        });
+
+        sel("#chirp").addEventListener("click", () => {
+
+            Chirp({
+                key: 'a446E331c381CdbBdD8EFeE3e',
+                onReceived: data => {
+                    if (data.length > 0) {
+                        sel("#placeholder").innerHTML = (toAscii(data));
+                        setTimeout(() => {
+                            sel("#placeholder").innerHTML = "";
+
+                        }, 3000);
+                    } else {
+                        console.error('Decode failed')
+                    }
+                }
+            }).then(sdk => {
+                sdk.start().then(() => {
+                    const rc = sdk.send('hello')
+                    if (rc !== 0) console.error(sdk.errorToString(rc))
+                }).catch(console.error)
+            }).catch(console.error)
+        });
+
+
+
+
+        sel("#signout").addEventListener("click", function () {
+            auth.signOut();
+        });
+
+        function sel(d) {
+            return document.querySelector(d);
+        }
+    </script>
+</body>
+
+</html>

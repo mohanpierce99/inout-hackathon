@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="marg-top"></div>
+    <h3 class="text-center bold">Drive Me!</h3>
+    <div class="row">
+        <div class="col-sm-6">
+            <img src="car.svg" class="width-90" alt="">
+        </div>
+        <div class="col-sm-5">
+            <br>
+            <div class="sc-177riys-3 dbiRCJ">
+                <div class="sc-177riys-1 hMUaBO" id="toggler">
+                    <div style="transform: translateX(-80px) translateZ(0px); width: 200px;" class="sc-177riys-2 hqrgFY"
+                        id="animate"></div>
+                </div>
+            </div>
+            <div class="scene scene--card">
+                <div class="card">
+                    <div class="card__face card__face--front">
+                        <form id="signin">
+                            <br>
+
+                            <div class="form-group">
+                                <input type="email" class="form-control" id="email" aria-describedby="emailHelp"
+                                    placeholder="Enter email">
+                                <small id="emailHelp" class="form-text text-muted">We'll never share your email with
+                                    anyone
+                                    else.</small>
+                            </div>
+                            <br>
+
+                            <div class="form-group">
+                                <input type="password" class="form-control" id="password" placeholder="Password">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary extend purp bold">Hop in !</button>
+                        </form>
+
+                    </div>
+                    <div class="card__face card__face--back">
+                        <form id="signup">
+                            <br>
+                            <div class="form-group">
+                                <input type="email" class="form-control fix" id="email1" aria-describedby="emailHelp"
+                                    placeholder="Enter email">
+                                <small id="emailHelp" class="form-text text-muted">We'll never share your email with
+                                    anyone
+                                    else.</small>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" class="form-control fix" id="password1" placeholder="Password">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control fix" id="username" placeholder="Name">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary extend purp bold">Submit</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+    <script>
+        (function () {
+            var switcher = false;
+            var card = document.querySelector('.card');
+            sel("#toggler").addEventListener("click", () => {
+                card.classList.toggle('is-flipped');
+                if (switcher) {
+                    sel("#animate").style = "transform: translateX(-80px) translateZ(0px); width: 200px;"
+                    switcher = false;
+
+                } else {
+                    sel("#animate").style = "transform: translateX(94px) translateZ(0px); width: 170px;"
+                    switcher = true;
+                }
+            })
+
+        })();
+
+        function sel(d) {
+            return document.querySelector(d);
+        }
+    </script>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/5.7.2/firebase.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.2.1/firebase-analytics.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyBPTxEcmp_9yib4KUtzw80Pw5UT0r0Fhro",
+            authDomain: "drive-me-fd3b1.firebaseapp.com",
+            databaseURL: "https://drive-me-fd3b1.firebaseio.com",
+            projectId: "drive-me-fd3b1",
+            storageBucket: "drive-me-fd3b1.appspot.com",
+            messagingSenderId: "749427605920",
+            appId: "1:749427605920:web:5ae9bbf46c7f28075624c5",
+            measurementId: "G-9F7WCC76RH"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        let auth = firebase.default.auth();
+        let db = firebase.firestore();
+        var signedUp = false;
+
+        auth.onAuthStateChanged(function (authdata) {
+            if (authdata && (!signedUp)) {
+                window.open("home.html", "_self");
+                return;
+            } else {
+                console.log("Signed out");
+            }
+        });
+
+
+        sel("#signin").addEventListener("submit", function (e) {
+            e.preventDefault();
+            console.log("hey");
+            signIn(sel("#email").value, sel("#password").value);
+        });
+
+        sel("#signup").addEventListener("submit", function (e) {
+            e.preventDefault();
+            console.log("hey");
+            signUp(sel("#email1").value, sel("#password1").value, sel("#username").value);
+        });
+
+
+        function signIn(email, pass) {
+            auth.signInWithEmailAndPassword(email, pass).catch((err) => alert(err));
+        }
+
+        function signUp(email, pass, name) {
+            signedUp = true;
+
+            auth.createUserWithEmailAndPassword(email, pass).then(function (authdata) {
+                db.collection("users").get().then((data) => {
+                    return db.collection("users").add({
+                        name: name,
+                        email: email,
+                        password: pass,
+                        chirpid: data.size + 1,
+                        uid: firebase.auth().currentUser.uid
+                    }).then((data) => {
+                        window.open("home.html", "_self")
+                    }).catch((err) => {
+                        alert(err);
+                    });
+
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
